@@ -1,5 +1,5 @@
 clear; clc;
-% part1();
+part1();
 part2();
 
 function part1()
@@ -30,10 +30,7 @@ function part2()
 A = 2; % начальные условия
 I0 = 5;
 D0 = 1;
-tp = 60*10^-12;
-tc = 1*10^-9;
-ts = 0;
-te = 50;
-lab_1_task_2(I0, D0, A, tp, tc, ts, te);
+tp = 60;
+lab_1_task_2(A, I0, D0, tp, '-o');
 end
 
