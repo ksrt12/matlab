@@ -1,5 +1,5 @@
 clear; clc;
-part1();
+% part1();
 part2();
 
 function part1()
@@ -33,6 +33,10 @@ I0 = 5;
 D0 = 1;
 tp = 60;
 te = 100;
-auxiliary(A, I0, D0, tp, te);
+[x,y] = auxiliary(A, I0, D0, tp, te);
+figure;
+plot(x*tp*10^-3,y(:,1),'-o')
+xlabel('t (ns)')
+ylabel('I(t)')
 end
 
