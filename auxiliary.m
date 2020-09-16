@@ -1,20 +1,16 @@
-function lab_1_task_2(A, I0, D0, tp_p, plot_opt)
-
-if nargin < 5
-    plot_opt = '';
-end
+function auxiliary(A, I0, D0, tp_p, te, laba)
 
 tp = tp_p*10^-12;
 tc = 10^(-9);
 gam = tp/tc;
 opt = odeset('RelTol',0.0001);
 
-ts = 0; te = 50;
+ts = 0;
 
 [tt,yy]=ode45(@func, [ts te], [I0 D0], opt);
 
 figure;
-plot(tt*tp/tc,yy(:,1),plot_opt)
+plot(tt*tp/tc,yy(:,1),'-o')
 xlabel('t (ns)')
 ylabel('I(t)')
 
