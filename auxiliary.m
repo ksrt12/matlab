@@ -1,14 +1,13 @@
-function [tt, yy] = auxiliary(A, I0, D0, tp_p, te, fa)
+function [tt, yy] = auxiliary(A, I0, D0, tp_p, ts, te, fa)
 
-if (nargin > 5)
+if (nargin > 6)
     sa = A*0.1;
-%     range = [fa*0.05 fa*1.25];
 else
     sa = 0;
     fa = pi;
 end
 
-range = [0 te];
+range = [ts te];
 tp = tp_p*10^-12;
 tc = 10^(-9);
 gam = tp/tc;
@@ -25,3 +24,4 @@ function dy = func(t, y)
 end
 
 end
+
