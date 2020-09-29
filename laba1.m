@@ -39,7 +39,7 @@ ts = 0;
 te = 100;
 [x,y] = auxiliary(A, I0, D0, tp, ts, te);
 figure;
-plot(x*tp*10^-3,y(:,1),'-o')
+plot(x,y(:,1),'-o')
 xlabel('t (ns)')
 ylabel('I(t)')
 end

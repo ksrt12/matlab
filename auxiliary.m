@@ -1,4 +1,4 @@
-function [tt, yy] = auxiliary(A, I0, D0, tp_p, ts, te, fa)
+function [tt, yy] = auxiliary(A, I0, D0, tp, ts, te, fa)
 
 if (nargin > 6)
     sa = A*0.1;
@@ -8,10 +8,8 @@ else
 end
 
 range = [ts te];
-tp = tp_p*10^-12;
-tc = 10^(-9);
-gam = tp/tc;
-opt = odeset('RelTol',0.0001);
+gam = tp*10^-3; % пс -> с
+opt = odeset('RelTol',0.00001);
 
 [tt,yy]=ode23(@func, range, [I0 D0], opt);
 
