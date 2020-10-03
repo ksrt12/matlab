@@ -64,7 +64,7 @@ for t=t_first:t_last
 
         c_right_x = (x_right:full_num).';
         c_right_y = DATA(c_right_x,2,i,t) - shift_y;
-        base = ((sum(c_left_y) + sum(c_right_y)) / (numel(c_left_x) + numel(c_right_x)));  % база
+        base = ((sum(c_left_y) + sum(c_right_y)) / (length(c_left_x) + length(c_right_x)));  % база
 
         [y_max, h_index] = max(zoom_y);
         half_y = abs(y_max - base)/2;
@@ -114,7 +114,7 @@ for t=t_first:t_last
     end
 end
 
-if (draw == 0)
+if (~draw)
     if (gauss)
         dname = "gauss";
     elseif (spline)
@@ -167,7 +167,7 @@ function [z_t] = zt(t)
 end
 
 function plot_hor(x,y)
-    plot([x(1) x(end)],[y y])
+    plot([x(1) x(end)],[y y]);
 end
 
 function [x,y] = interpol(x_old,y_old,pol,step)
