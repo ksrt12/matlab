@@ -41,9 +41,9 @@ pol      = 18;
 spline = ~gauss;
 
 for t=t_first:t_last
-    name_t = t*5+10;
+    name_t = zt(t);
     for i=i_first:i_last
-        name_i = i*100+300;
+        name_i = zi(i);
         [~, index_max] = max(DATA(:,2,i,t));
         
         x_left  = index_max - offset_l;
@@ -131,15 +131,13 @@ function final(half_X,t_end,dname,p)
     figure('Name',dname+p);
     grid on;
     hold on;
-    x = 1:length(half_X);
-    x_fori = x(1):0.1:x(end);
-    ox = x*100+300;
+    i = 1:length(half_X);
+    i2 = i(1):0.1:i(end);
     for t=1:t_end
-        I = half_X(:,t);
-        name = t*5+10;
-        y = interp1(x,I,x_fori,'spline');
-        plot(x_fori*100+300, y, color(t),'DisplayName', '');
-        plot(ox, I, point(t)+color(t),'DisplayName', num2str(name));
+        fwhm = half_X(:,t);
+        y = interp1(i,fwhm,i2,'spline');
+        plot(zi(i2), y, color(t),'DisplayName', '');
+        plot(zi(i), fwhm, point(t)+color(t),'DisplayName', num2str(zt(t)));
     end
     hold off;
 
@@ -158,6 +156,14 @@ function [r,l,wtf] = find_rl_index(M,x_ymax)
     else
         wtf = false;
     end
+end
+
+function [z_i] = zi(i)
+    z_i = i*100+300;
+end
+
+function [z_t] = zt(t)
+    z_t = t*5+10;
 end
 
 function plot_hor(x,y)
