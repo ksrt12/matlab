@@ -13,39 +13,48 @@ clear
 
 % save('DATA.mat', 'DATA' )
 
-tt = 5; ii = 18;
 DATA = matfile('DATA.mat').DATA;
 full_num = length(DATA);
 
-gauss  = false;
-draw   = false;
-spline = false;
+% default vars start
+gauss   = true;
+draw    = false;
+t_first = 1;
+t_last  = length(DATA(1,1,1,:));
+i_first = 1;
+i_last  = length(DATA(1,1,:,1));
+% default vars end
 
-shift_left  = 25;
-shift_right = 35;
-pol = 18;
-% draw   = true;
-gauss  = true;
-% spline = true;
 
-for t=1:5
+offset_l = 25;
+offset_r = 35;
+pol      = 18;
+% draw     = true;
+% gauss    = false;
+% t_first  = 5;
+% t_last   = 5;
+% i_first  = 18;
+% i_last   = 18;
+
+
+
+spline = ~gauss;
+
+for t=t_first:t_last
     name_t = t*5+10;
-    for i=1:18
-        name_j = i*100+300;
+    for i=i_first:i_last
+        name_i = i*100+300;
         [~, index_max] = max(DATA(:,2,i,t));
-        arr_picks(i,t) = index_max;
-        non0 = find(index_max);
-        index_first = non0(1);
         
-        x_left  = index_max - shift_left;
-        x_right = index_max + shift_right;
+        x_left  = index_max - offset_l;
+        x_right = index_max + offset_r;
         zoom = (x_left:x_right).';
 
 %         plot(DATA(:,1,j,t),DATA(:,2,j,t),o);
 %         plot([zoom_x(end) zoom_x(end)],[half_y 0]);
 %         plot([DATA(x_left,1,j,t) DATA(x_left,1,j,t)],[0.6 0.8]);
-        shift_x = DATA(index_first,1,i,t) - DATA(index_max,1,i,t);
-        shift_y = (sum(DATA(:,2,i,t)) - sum(DATA(zoom,2,i,t)))/(full_num-shift_left-shift_right-1);
+        shift_x = DATA(1,1,i,t) - DATA(index_max,1,i,t);
+        shift_y = (sum(DATA(:,2,i,t)) - sum(DATA(zoom,2,i,t)))/(full_num-offset_l-offset_r-1);
 
         zoom_x = DATA(zoom,1,i,t) + shift_x; % смещение по x
         zoom_y = DATA(zoom,2,i,t) - shift_y; % смещение по y
@@ -61,26 +70,26 @@ for t=1:5
         half_y = abs(y_max - base)/2;
 
         M0 = find_points(zoom_x,zoom_y,half_y);
-    if (gauss) % gauss
-        [zoom_x2,zoom_y2] = interpol(zoom_x,zoom_y,pol,0.01);
-        M2 = find_points(zoom_x2,zoom_y2,half_y);
-      if (length(M2) < 2)
-        M2 = M0;
-      end
-        M = M2;
-    elseif (spline) % spline
-        zoom_x2 = zoom_x(1):0.01:zoom_x(end);
-        zoom_y2 = interp1(zoom_x,zoom_y,zoom_x2,'spline');
-        M = find_points(zoom_x2,zoom_y2,half_y);
-    else
-        M = M0;
-    end
+        if (gauss) % gauss
+            [zoom_x2,zoom_y2] = interpol(zoom_x,zoom_y,pol,0.01);
+            M2 = find_points(zoom_x2,zoom_y2,half_y);
+            if (length(M2) < 2)
+                M2 = M0;
+            end
+            M = M2;
+        elseif (spline) % spline
+            zoom_x2 = zoom_x(1):0.01:zoom_x(end);
+            zoom_y2 = interp1(zoom_x,zoom_y,zoom_x2,'spline');
+            M = find_points(zoom_x2,zoom_y2,half_y);
+        else
+            M = M0;
+        end
 
         x_ymax = zoom_x(h_index);
 
         [m_min_r_index, m_min_l_index, wtf] = find_rl_index(M,x_ymax);
         if (wtf)
-            fprintf("T=%d, I=%d\n",name_t,name_j);
+            fprintf("T=%d, I=%d\n",name_t,name_i);
             [m_min_r_index, m_min_l_index, wtf] = find_rl_index(M0,x_ymax);
             M = M0;
         end
@@ -88,14 +97,14 @@ for t=1:5
         half_X(i,t) = abs(M(m_min_r_index,1)-M(m_min_l_index,1)); % FWHM
 
     if (draw)
-        figure('Name',"T="+name_t+",I="+name_j);
-        title("T="+name_t+",I="+name_j);
+        figure('Name',"T="+name_t+",I="+name_i);
+        title("T="+name_t+",I="+name_i);
         hold on;
         plot_hor(zoom_x,base);
         plot(zoom_x,zoom_y);
 %         findpeaks(zoom_y,zoom_x,'Annotate','extents','WidthReference','halfheight')
       if (gauss || spline)
-        plot(zoom_x2,zoom_y2,'-o');
+        plot(zoom_x2,zoom_y2,'-.');
 %         findpeaks(zoom_y2,zoom_x2,'Annotate','extents','WidthReference','halfheight');
       end
         plot_hor(zoom_x,half_y);
@@ -113,18 +122,19 @@ if (draw == 0)
     else
         dname = "";
     end
-    final(half_X,tt,dname);
+    final(half_X,t_last,dname,pol);
 end
-function final(half_X,tt,dname)
+
+function final(half_X,t_end,dname,p)
     point = ["." "+" "*" "o" "x"];
     color = ["r" "c" "g" "b" "m"];
-    figure('Name',dname);
+    figure('Name',dname+p);
     grid on;
     hold on;
     x = 1:length(half_X);
     x_fori = x(1):0.1:x(end);
     ox = x*100+300;
-    for t=1:tt
+    for t=1:t_end
         I = half_X(:,t);
         name = t*5+10;
         y = interp1(x,I,x_fori,'spline');
@@ -133,18 +143,18 @@ function final(half_X,tt,dname)
     end
     hold off;
 
-    title(legend('Location','best'),'T, C');
+    title(legend('Location','best'),'T, °C');
     xlabel('I, mA');
     ylabel('FWHM, nm');
 end
 
 function [r,l,wtf] = find_rl_index(M,x_ymax)
     m = M(:,1) - x_ymax;
-	r = find(m>0, 1 );
-	l = find(m<0, 1, 'last' );
+    r = find(m>0, 1 );
+    l = find(m<0, 1, 'last' );
     if (isempty(r) || isempty(l))
-    	fprintf('wtf: ');
-    	wtf = true;
+        fprintf('wtf: ');
+        wtf = true;
     else
         wtf = false;
     end
