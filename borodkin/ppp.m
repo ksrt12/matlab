@@ -19,6 +19,7 @@ full_num = length(DATA);
 % default vars start
 gauss   = true;
 draw    = false;
+orig    = false;
 t_first = 1;
 t_last  = length(DATA(1,1,1,:));
 i_first = 1;
@@ -29,19 +30,23 @@ i_last  = length(DATA(1,1,:,1));
 offset_l = 25;
 offset_r = 35;
 pol      = 18;
-% draw     = true;
+draw     = true;
+% orig     = true;
 % gauss    = false;
 % t_first  = 5;
 % t_last   = 5;
-% i_first  = 18;
+% i_first  = 1;
 % i_last   = 18;
-
 
 
 spline = ~gauss;
 
 for t=t_first:t_last
     name_t = zt(t);
+    if (orig)
+        figure('Name',"T="+name_t);
+        hold on;
+    end
     for i=i_first:i_last
         name_i = zi(i);
         [~, index_max] = max(DATA(:,2,i,t));
@@ -50,9 +55,6 @@ for t=t_first:t_last
         x_right = index_max + offset_r;
         zoom = (x_left:x_right).';
 
-%         plot(DATA(:,1,j,t),DATA(:,2,j,t),o);
-%         plot([zoom_x(end) zoom_x(end)],[half_y 0]);
-%         plot([DATA(x_left,1,j,t) DATA(x_left,1,j,t)],[0.6 0.8]);
         shift_x = DATA(1,1,i,t) - DATA(index_max,1,i,t);
         shift_y = (sum(DATA(:,2,i,t)) - sum(DATA(zoom,2,i,t)))/(full_num-offset_l-offset_r-1);
 
@@ -96,25 +98,35 @@ for t=t_first:t_last
 
         half_X(i,t) = abs(M(m_min_r_index,1)-M(m_min_l_index,1)); % FWHM
 
-    if (draw)
+    if (orig)
+        plot(DATA(:,1,i,t),DATA(:,2,i,t),'DisplayName',""+name_i);
+%         plot([zoom_x(end) zoom_x(end)],[half_y 0]);
+%         plot([DATA(x_left,1,i,t) DATA(x_left,1,i,t)],[0.6 0.8]);
+    elseif (draw)
         figure('Name',"T="+name_t+",I="+name_i);
         title("T="+name_t+",I="+name_i);
         hold on;
-        plot_hor(zoom_x,base);
-        plot(zoom_x,zoom_y);
+        plot_hor(zoom_x,base,'base');
+        plot(zoom_x,zoom_y,'DisplayName','zoomed');
 %         findpeaks(zoom_y,zoom_x,'Annotate','extents','WidthReference','halfheight')
-      if (gauss || spline)
-        plot(zoom_x2,zoom_y2,'-.');
+        if (gauss || spline)
+          plot(zoom_x2,zoom_y2,'-.','DisplayName','apprx');
 %         findpeaks(zoom_y2,zoom_x2,'Annotate','extents','WidthReference','halfheight');
-      end
-        plot_hor(zoom_x,half_y);
-        plot(M(:,1),M(:,2),'*g');
+        end
+        plot_hor(zoom_x,half_y,'half y');
+        plot(M([m_min_l_index,m_min_r_index],1),M([m_min_l_index,m_min_r_index],2),'*g','DisplayName','L R points');
+        legend('Location','best');
         hold off;
     end
     end
+    if (orig)
+        hold off;
+        legend('Location','best');
+        title("T="+name_t);
+    end
 end
 
-if (draw == 0)
+if (~draw && ~orig)
     if (gauss)
         dname = "gauss";
     elseif (spline)
@@ -166,8 +178,8 @@ function [z_t] = zt(t)
     z_t = t*5+10;
 end
 
-function plot_hor(x,y)
-    plot([x(1) x(end)],[y y])
+function plot_hor(x,y,dname)
+    plot([x(1) x(end)],[y y],'DisplayName',dname);
 end
 
 function [x,y] = interpol(x_old,y_old,pol,step)
@@ -201,6 +213,10 @@ function [M] = find_points(x1,y1,y2)
         % сохраняем координаты:
         M(i,:) = u;
     end
+end
+
+function [v] = isvar(~)
+	v=inputname(1);
 end
 
 
