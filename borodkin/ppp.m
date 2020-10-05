@@ -124,16 +124,17 @@ if (~draw && ~orig)
     else
         dname = "";
     end
-    final(half_X,t_last,dname,pol);
+    final(half_X,dname,pol);
 end
 
-function final(half_X,t_end,dname,p)
+function final(half_X,dname,p)
+    [i_end,t_end] = size(half_X);
     point = ["." "+" "*" "o" "x"];
     color = ["r" "c" "g" "b" "m"];
     figure('Name',dname+p);
     grid on;
     hold on;
-    i = 1:length(half_X);
+    i = 1:i_end;
     i2 = i(1):0.1:i(end);
     for t=1:t_end
         fwhm = half_X(:,t);
