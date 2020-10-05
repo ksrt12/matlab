@@ -56,7 +56,7 @@ for t=t_first:t_last
 
         c_right_x = (x_right:full_num).';
         c_right_y = DATA{i,t}(c_right_x,2) - shift_y;
-        base = ((sum(c_left_y) + sum(c_right_y)) / (numel(c_left_x) + numel(c_right_x)));  % база
+        base = ((sum(c_left_y) + sum(c_right_y)) / (length(c_left_x) + length(c_right_x)));  % база
 
         [y_max, h_index] = max(zoom_y);
         half_y = abs(y_max - base)/2;
