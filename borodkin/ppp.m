@@ -1,38 +1,28 @@
-clc
-clear
+% BORODKIN'S LABA 2
+% created by kazakovstepan
 
-% tt = 0;
-% for T=15:5:35
-%     ii=0;
-%     tt=tt+1;
-%     for I=400:100:2100
-%         ii=ii+1;
-%         DATA(:,:,ii,tt) = table2array(readtable("files\"+T+"\"+I+".DAT"));
-%     end
-% end
+dfname = "DATA.mat";
+dfpath = "files";
 
-% save('DATA.mat', 'DATA' )
-
-DATA = matfile('DATA.mat').DATA;
-full_num = length(DATA);
+DATA = checkdata(dfname,dfpath);
+full_num = length(DATA{1,1});
 
 % default vars start
-gauss   = true;
-draw    = false;
-orig    = false;
-t_first = 1;
-t_last  = length(DATA(1,1,1,:));
-i_first = 1;
-i_last  = length(DATA(1,1,:,1));
+gauss    = true;  % использовать Гауссово рапределение для интерполяции
+draw     = false; % рисовать каждый график для текущих T,I
+orig     = false; % рисовать исходные графики
+pol      = 18;    % степень полинома для интерполяции
+offset_l = 25;    % промежуток справа от пика
+offset_r = 35;    % промежуток слева  от пика
+t_first  = 1;
+i_first  = 1;
+[i_last, t_last] = size(DATA);
 % default vars end
 
 
-offset_l = 25;
-offset_r = 35;
-pol      = 18;
-draw     = true;
+% draw     = true;
 % orig     = true;
-% gauss    = false;
+% gauss    = false; 
 % t_first  = 5;
 % t_last   = 5;
 % i_first  = 1;
@@ -49,23 +39,23 @@ for t=t_first:t_last
     end
     for i=i_first:i_last
         name_i = zi(i);
-        [~, index_max] = max(DATA(:,2,i,t));
+        [~, index_max] = max(DATA{i,t}(:,2));
         
         x_left  = index_max - offset_l;
         x_right = index_max + offset_r;
         zoom = (x_left:x_right).';
 
-        shift_x = DATA(1,1,i,t) - DATA(index_max,1,i,t);
-        shift_y = (sum(DATA(:,2,i,t)) - sum(DATA(zoom,2,i,t)))/(full_num-offset_l-offset_r-1);
+        shift_x = DATA{i,t}(1,1) - DATA{i,t}(index_max,1);
+        shift_y = (sum(DATA{i,t}(:,2)) - sum(DATA{i,t}(zoom,2)))/(full_num-offset_l-offset_r-1);
 
-        zoom_x = DATA(zoom,1,i,t) + shift_x; % смещение по x
-        zoom_y = DATA(zoom,2,i,t) - shift_y; % смещение по y
+        zoom_x = DATA{i,t}(zoom,1) + shift_x; % смещение по x
+        zoom_y = DATA{i,t}(zoom,2) - shift_y; % смещение по y
 
         c_left_x = (1:x_left).';
-        c_left_y = DATA(c_left_x,2,i,t) - shift_y;
+        c_left_y = DATA{i,t}(c_left_x,2) - shift_y;
 
         c_right_x = (x_right:full_num).';
-        c_right_y = DATA(c_right_x,2,i,t) - shift_y;
+        c_right_y = DATA{i,t}(c_right_x,2) - shift_y;
         base = ((sum(c_left_y) + sum(c_right_y)) / (numel(c_left_x) + numel(c_right_x)));  % база
 
         [y_max, h_index] = max(zoom_y);
@@ -99,9 +89,9 @@ for t=t_first:t_last
         half_X(i,t) = abs(M(m_min_r_index,1)-M(m_min_l_index,1)); % FWHM
 
     if (orig)
-        plot(DATA(:,1,i,t),DATA(:,2,i,t),'DisplayName',""+name_i);
+        plot(DATA{i,t}(:,1),DATA{i,t}(:,2),'DisplayName',""+name_i);
 %         plot([zoom_x(end) zoom_x(end)],[half_y 0]);
-%         plot([DATA(x_left,1,i,t) DATA(x_left,1,i,t)],[0.6 0.8]);
+%         plot([DATA{i,t}(x_left,1) DATA{i,t}(x_left,1)],[0.6 0.8]);
     elseif (draw)
         figure('Name',"T="+name_t+",I="+name_i);
         title("T="+name_t+",I="+name_i);
@@ -215,10 +205,30 @@ function [M] = find_points(x1,y1,y2)
     end
 end
 
-function [v] = isvar(~)
+function [v] = varname(~)
 	v=inputname(1);
 end
 
+function [data] = checkdata(fname,fpath)
+if exist((fname),'file')
+    data = matfile(fname).data;
+    disp("Found "+fname+"!");
+else
+    disp(fname+" is not found!");
+    disp("Creating it...");
+    t = 0;
+    for T=15:5:35
+        i=0;
+        t=t+1;
+        for I=400:100:2100
+            i=i+1;
+            data{i,t} = table2array(readtable(fpath+"\"+T+"\"+I+".DAT"));
+        end
+    end
+    save(fname,'data');
+    disp(fname+" created and saved!");
+end
+end
 
 %         zoom_xx_yy = [zoom_x2; zoom_y2];
 %         plot(zoom_x,interpol(zoom_x,zoom_y,2*V),o);
