@@ -8,10 +8,12 @@ DATA = checkdata(dfname,dfpath);
 full_num = length(DATA{1,1});
 
 % default vars start
-gauss    = true;  % использовать Гауссово рапределение для интерполяции
+gauss    = true;  % использовать Гауссову интерполяцию
+spline   = false; % исgользовать интерполяцию сплайнами
 draw     = false; % рисовать каждый график для текущих T,I
 orig     = false; % рисовать исходные графики
 pol      = 18;    % степень полинома для интерполяции
+fpgauss  = 5;     % степень полинома для финального графика [0..i_last]|false
 offset_l = 25;    % промежуток справа от пика
 offset_r = 35;    % промежуток слева  от пика
 t_first  = 1;
@@ -19,9 +21,10 @@ i_first  = 1;
 [i_last, t_last] = size(DATA);
 % default vars end
 
-
+% fpgauss  = false;
 % draw     = true;
 % orig     = true;
+% spline   = true;
 % gauss    = false; 
 % t_first  = 5;
 % t_last   = 5;
@@ -29,8 +32,28 @@ i_first  = 1;
 % i_last   = 18;
 
 
-spline = ~gauss;
+if (gauss && spline)
+    disp("Selected gauss instead of spline");
+    spline = false;
+end
 
+if (orig)
+    fig_num = t_last;
+elseif (draw)
+    fig_num = (t_last-t_first+1)*(i_last-i_first+1);
+else
+    fig_num = "final";
+end
+
+if (draw && (fig_num > 20))
+    fprintf("Will be printed %d figures\n",fig_num);
+    conf = input("Сontinue? (y/n): ",'s')+"";
+    if ((conf ~= "y") && (conf ~= "Y"))
+        draw = false;
+    end
+end
+
+fprintf("Print %s figures\n",""+fig_num)
 for t=t_first:t_last
     name_t = zt(t);
     if (orig)
@@ -118,27 +141,37 @@ end
 
 if (~draw && ~orig)
     if (gauss)
-        dname = "gauss";
+        dname = "gauss"+pol;
     elseif (spline)
         dname = "spline";
     else
         dname = "";
     end
-    final(half_X,dname,pol);
+    if (fpgauss)
+        dname = dname+":gauss"+fpgauss;
+    else
+        dname = dname+":spline";
+    end
+    final(half_X,dname,fpgauss);
 end
 
 function final(half_X,dname,p)
     [i_end,t_end] = size(half_X);
     point = ["." "+" "*" "o" "x"];
     color = ["r" "c" "g" "b" "m"];
-    figure('Name',dname+p);
+    figure('Name',dname);
+    disp(dname);
     grid on;
     hold on;
     i = 1:i_end;
-    i2 = i(1):0.1:i(end);
+    i2 = 1:0.1:i_end;
     for t=1:t_end
         fwhm = half_X(:,t);
-        y = interp1(i,fwhm,i2,'spline');
+        if (p)
+            [~,y] = interpol(i,fwhm,p,0.1);
+        else
+            y = interp1(i,fwhm,i2,'spline');
+        end
         plot(zi(i2), y, color(t),'DisplayName', '');
         plot(zi(i), fwhm, point(t)+color(t),'DisplayName', num2str(zt(t)));
     end
@@ -213,7 +246,7 @@ end
 function [data] = checkdata(fname,fpath)
 if exist((fname),'file')
     data = matfile(fname).data;
-    disp("Found "+fname+"!");
+    disp("Reading "+fname);
 else
     disp(fname+" is not found!");
     disp("Creating it...");
