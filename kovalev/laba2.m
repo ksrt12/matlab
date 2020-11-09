@@ -2,7 +2,7 @@ clear; clc;
 A = 3; % начальные условия
 
 main(A);
-% main(A*0.75);
+main(A*0.75);
 
 function main(A)
 
