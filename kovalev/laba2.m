@@ -2,13 +2,13 @@ clear; clc;
 A = 3; % начальные условия
 
 main(A);
-main(A*0.75);
+% main(A*0.75);
 
 function main(A)
 
 D0 = 1;
 tp = 60; % пс
-fa = 0.053004; % 10^9 Гц
+fa = 0.054053; % ГГц
 ts = 0; % t_start
 num = 50; % количество точек
 famin = fa*0.05; % 5%
@@ -31,6 +31,6 @@ figure('Name',"A="+A);
 plot(u(:,1), u(:,2), 'b-o', u(:,1), u(:,3), 'r-o'); % построение графиков
 legend('Imin','Imax');
 title("I(f) при A="+A);
-xlabel('f, 10^9')
+xlabel('f, tp^-1')
 ylabel('I(f)')
 end

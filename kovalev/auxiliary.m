@@ -7,11 +7,10 @@ else
     fa = pi;
 end
 
-range = [ts te];
-gam = tp*10^-3; % пс -> с
+gam = tp*10^-3; % пс -> безразмер при tPP=1нс
 opt = odeset('RelTol',0.00001);
 
-[tt,yy]=ode23(@func, range, [I0 D0], opt);
+[tt,yy]=ode23(@func, [ts te], [I0 D0], opt);
 
 function dy = func(t, y)
   dI = y(1)*(y(2)-1);

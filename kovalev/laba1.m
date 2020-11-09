@@ -1,7 +1,23 @@
 clear; clc;
 % part1();
-part2();
+% part2();
+% function part2()
+A = 3; % начальные условия
+I0 = 5;
+D0 = 1;
+tp = 60;
+ts = 0;
+te = 100;
+[x,y] = auxiliary(A, I0, D0, tp, ts, te);
+figure;
+[py,px] = findpeaks(y(:,1),x);
+plot(x*tp*10^-3,y(:,1),'-o');
+% hold on
+% findpeaks(y(:,1),x);
 
+xlabel('t (ns)')
+ylabel('I(t)')
+% end
 function part1()
 range = [-15 15];
 % subplot(1,3,1)
@@ -30,17 +46,5 @@ function [f1] = func2(x)
 f1 = (3/((x.^2+1).^2.5)+(x.^2+1).^-1.5); % 2я производная
 end
 
-function part2()
-A = 3; % начальные условия
-I0 = 5;
-D0 = 1;
-tp = 60;
-ts = 0;
-te = 100;
-[x,y] = auxiliary(A, I0, D0, tp, ts, te);
-figure;
-plot(x,y(:,1),'-o')
-xlabel('t (ns)')
-ylabel('I(t)')
-end
+
 
